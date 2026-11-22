@@ -1,12 +1,15 @@
-# File pengujian password lokal
+
+# File pengujian lokal
 /database/test-password.php
 
-# Konfigurasi dan rahasia lokal
+# Konfigurasi database lokal
+/config/database.php
+/database/config.local.php
+
+# File rahasia
 .env
 .env.*
 !.env.example
-
-/database/config.local.php
 
 # File sementara
 *.log
