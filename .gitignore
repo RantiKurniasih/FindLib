@@ -1,0 +1,22 @@
+# Konfigurasi database lokal
+/config/database.php
+
+# File rahasia
+.env
+.env.*
+!.env.example
+
+# File log
+*.log
+
+# File sementara
+*.tmp
+*.bak
+
+# File sistem
+.DS_Store
+Thumbs.db
+
+# Pengaturan editor
+.vscode/
+.idea/
