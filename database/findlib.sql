@@ -64,23 +64,6 @@ COLLATE=utf8mb4_unicode_ci;
 
 
 -- =========================================
--- TABEL LOKASI RAK
--- Menyimpan informasi lokasi rak buku
--- =========================================
-
-CREATE TABLE IF NOT EXISTS lokasi_rak (
-    id_rak INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    kode_rak VARCHAR(20) NOT NULL,
-    nama_rak VARCHAR(100) NOT NULL,
-
-    CONSTRAINT uq_lokasi_kode
-        UNIQUE (kode_rak)
-) ENGINE=InnoDB
-DEFAULT CHARSET=utf8mb4
-COLLATE=utf8mb4_unicode_ci;
-
-
--- =========================================
 -- TABEL BUKU
 -- Menyimpan katalog dan stok buku FINDLIB
 -- =========================================
