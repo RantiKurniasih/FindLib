@@ -4,7 +4,6 @@
 
 - Nama sistem: FINDLIB (Find Library)
 - Institusi: FMIPA Universitas Halu Oleo
-- Product Owner: Kallyn Renanda Putri
 - Jenis aplikasi: Website informasi ketersediaan buku
 - Status: Draft — Perlu dikonfirmasi
 
