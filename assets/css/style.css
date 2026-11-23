@@ -1,0 +1,681 @@
+/* =========================
+   PENGATURAN DASAR
+========================= */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f7fb;
+    color: #263445;
+    line-height: 1.6;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+button,
+input {
+    font: inherit;
+}
+
+button,
+a,
+input {
+    outline-offset: 3px;
+}
+
+:focus-visible {
+    outline: 3px solid #facc15;
+}
+
+/* =========================
+   NAVBAR
+========================= */
+
+.navbar {
+    background-color: #17365d;
+    color: white;
+    padding: 20px 8%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+}
+
+.logo {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.nav-menu {
+    display: flex;
+    gap: 30px;
+    list-style: none;
+}
+
+.nav-menu a {
+    font-size: 15px;
+    font-weight: 500;
+}
+
+.nav-menu a:hover {
+    color: #bfdbfe;
+    text-decoration: underline;
+}
+
+/* =========================
+   HERO / BERANDA
+========================= */
+
+.hero {
+    background: linear-gradient(
+        135deg,
+        #17365d,
+        #24558b
+    );
+    color: white;
+    min-height: 380px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 70px 20px;
+    text-align: center;
+}
+
+.hero-content {
+    width: 100%;
+    max-width: 800px;
+}
+
+.hero h1 {
+    font-size: 38px;
+    margin-bottom: 15px;
+}
+
+.hero p {
+    font-size: 17px;
+    margin-bottom: 30px;
+    color: #e2e8f0;
+}
+
+/* =========================
+   PENCARIAN BUKU
+========================= */
+
+.search-box {
+    max-width: 650px;
+    margin: 0 auto;
+    text-align: left;
+}
+
+.search-box label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+
+.search-input {
+    display: flex;
+    gap: 10px;
+}
+
+.search-input input {
+    flex: 1;
+    min-width: 0;
+    padding: 14px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    background-color: white;
+}
+
+.search-input button {
+    padding: 14px 25px;
+    background-color: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.search-input button:hover {
+    background-color: #1d4ed8;
+}
+
+/* =========================
+   FITUR FINDLIB
+========================= */
+
+.features {
+    padding: 65px 8%;
+    text-align: center;
+}
+
+.features h2 {
+    font-size: 28px;
+    color: #17365d;
+    margin-bottom: 35px;
+}
+
+.feature-container {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 25px;
+    max-width: 1150px;
+    margin: 0 auto;
+}
+
+.feature-card {
+    background-color: white;
+    padding: 30px 25px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    text-align: left;
+}
+
+.feature-card h3 {
+    font-size: 19px;
+    color: #17365d;
+    margin-bottom: 12px;
+}
+
+.feature-card p {
+    color: #64748b;
+    font-size: 15px;
+}
+
+/* =========================
+   FOOTER
+========================= */
+
+footer {
+    background-color: #102744;
+    color: white;
+    padding: 25px 20px;
+    text-align: center;
+    font-size: 14px;
+}
+
+/* =========================
+   RESPONSIVE TABLET
+========================= */
+
+@media (max-width: 900px) {
+    .navbar {
+        padding: 20px 5%;
+    }
+
+    .feature-container {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+/* =========================
+   RESPONSIVE HP
+========================= */
+
+@media (max-width: 600px) {
+    .navbar {
+        flex-direction: column;
+        text-align: center;
+        padding: 20px;
+    }
+
+    .nav-menu {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 15px;
+    }
+
+    .hero {
+        padding: 55px 20px;
+    }
+
+    .hero h1 {
+        font-size: 28px;
+    }
+
+    .hero p {
+        font-size: 15px;
+    }
+
+    .search-input {
+        flex-direction: column;
+    }
+
+    .search-input button {
+        width: 100%;
+    }
+
+    .features {
+        padding: 45px 5%;
+    }
+
+    .features h2 {
+        font-size: 24px;
+    }
+
+    .feature-container {
+        grid-template-columns: 1fr;
+    }
+
+    .feature-card {
+        padding: 25px;
+    }
+}
+
+/* =========================
+   HALAMAN KATALOG FINDLIB
+========================= */
+
+/* Judul halaman katalog */
+.features > h1 {
+    color: #17365d;
+    font-size: 32px;
+    margin-bottom: 10px;
+}
+
+.features > p {
+    color: #64748b;
+    margin-bottom: 30px;
+}
+
+/* Form pencarian katalog */
+.features .search-box {
+    max-width: 750px;
+    margin: 0 auto 35px;
+}
+
+.features .search-box label {
+    color: #17365d;
+}
+
+/* Pesan data buku belum tersedia */
+.empty-state {
+    max-width: 900px;
+    margin: 30px auto;
+    padding: 45px 25px;
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    text-align: center;
+}
+
+.empty-state h2 {
+    color: #17365d;
+    font-size: 24px;
+    margin-bottom: 12px;
+}
+
+.empty-state p {
+    color: #64748b;
+    font-size: 15px;
+}
+
+/* Tampilan katalog pada HP */
+@media (max-width: 600px) {
+    .features > h1 {
+        font-size: 26px;
+    }
+
+    .features .search-box {
+        width: 100%;
+    }
+
+    .empty-state {
+        padding: 30px 18px;
+    }
+
+    .empty-state h2 {
+        font-size: 21px;
+    }
+}
+
+/* =========================
+   FILTER KATEGORI BUKU
+========================= */
+
+.category-filter {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 180px;
+}
+
+.category-filter label {
+    color: #17365d;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.category-filter select {
+    width: 100%;
+    padding: 14px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    background-color: white;
+    color: #263445;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.category-filter select:focus-visible {
+    outline: 3px solid #facc15;
+    outline-offset: 2px;
+}
+
+/* Tampilan filter pada HP */
+@media (max-width: 600px) {
+    .category-filter {
+        width: 100%;
+    }
+}
+
+/* =========================
+   TATA LETAK PENCARIAN KATALOG
+========================= */
+
+.features .search-input {
+    display: flex;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.features .search-input input {
+    flex: 2 1 220px;
+    min-width: 0;
+}
+
+.features .category-filter {
+    flex: 1 1 180px;
+    min-width: 0;
+}
+
+.features .search-input button {
+    flex: 0 0 auto;
+}
+
+/* Responsif untuk layar HP */
+@media (max-width: 600px) {
+    .features .search-input {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .features .search-input input,
+    .features .category-filter,
+    .features .search-input button {
+        flex: none;
+        width: 100%;
+    }
+}
+
+/* =========================
+   HASIL KATALOG BUKU
+========================= */
+
+.catalog-results {
+    max-width: 1100px;
+    margin: 40px auto 0;
+    text-align: left;
+}
+
+.catalog-results > h2 {
+    color: #17365d;
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+.catalog-results .empty-state {
+    max-width: 100%;
+    margin: 0;
+    text-align: center;
+}
+
+.catalog-results .empty-state h3 {
+    color: #17365d;
+    font-size: 20px;
+    margin-bottom: 10px;
+}
+
+/* Tampilan HP */
+@media (max-width: 600px) {
+    .catalog-results {
+        margin-top: 30px;
+    }
+
+    .catalog-results > h2 {
+        font-size: 21px;
+    }
+}
+
+/* =========================
+   KARTU BUKU FINDLIB
+========================= */
+
+.book-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px;
+    margin-top: 25px;
+}
+
+.book-card {
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.book-cover {
+    background-color: #e5edf7;
+    min-height: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 50px;
+}
+
+.book-info {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    flex: 1;
+}
+
+.book-category {
+    color: #2563eb;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.book-info h3 {
+    color: #17365d;
+    font-size: 18px;
+    overflow-wrap: anywhere;
+}
+
+.book-author {
+    color: #64748b;
+    font-size: 14px;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.status-available {
+    background-color: #dcfce7;
+    color: #166534;
+}
+
+.status-unavailable {
+    background-color: #fee2e2;
+    color: #991b1b;
+}
+
+.book-detail-link {
+    display: block;
+    width: 100%;
+    background-color: #17365d;
+    color: white;
+    text-align: center;
+    padding: 11px;
+    border-radius: 8px;
+    font-weight: bold;
+    margin-top: auto;
+}
+
+.book-detail-link:hover {
+    background-color: #24558b;
+}
+
+/* Tampilan tablet */
+@media (max-width: 900px) {
+    .book-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+/* Tampilan HP */
+@media (max-width: 600px) {
+    .book-grid {
+        grid-template-columns: 1fr;
+        gap: 18px;
+    }
+
+    .book-info {
+        padding: 18px;
+    }
+}
+
+/* =========================
+   HALAMAN DETAIL BUKU
+========================= */
+
+.detail-page {
+    padding: 50px 20px;
+    min-height: 65vh;
+}
+
+.detail-container {
+    max-width: 950px;
+    margin: 0 auto;
+}
+
+.back-link {
+    display: inline-block;
+    color: #2563eb;
+    font-weight: bold;
+    margin-bottom: 25px;
+}
+
+.back-link:hover {
+    text-decoration: underline;
+}
+
+.detail-container > h1 {
+    color: #17365d;
+    font-size: 30px;
+    margin-bottom: 25px;
+}
+
+.book-detail-card {
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 30px;
+}
+
+.book-detail-card h2 {
+    color: #17365d;
+    font-size: 24px;
+    margin-bottom: 25px;
+    overflow-wrap: anywhere;
+}
+
+.book-detail-list {
+    margin: 0;
+}
+
+.detail-row {
+    display: grid;
+    grid-template-columns: 220px minmax(0, 1fr);
+    gap: 20px;
+    padding: 14px 0;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.detail-row dt {
+    color: #475569;
+    font-weight: bold;
+}
+
+.detail-row dd {
+    margin: 0;
+    color: #263445;
+    overflow-wrap: anywhere;
+}
+
+.detail-row:last-child {
+    border-bottom: none;
+}
+
+/* Tombol pada pesan detail buku */
+.detail-page .empty-state .book-detail-link {
+    max-width: 250px;
+    margin: 25px auto 0;
+}
+
+/* Tampilan tablet */
+@media (max-width: 900px) {
+    .detail-page {
+        padding: 40px 20px;
+    }
+}
+
+/* Tampilan HP */
+@media (max-width: 600px) {
+    .detail-page {
+        padding: 30px 15px;
+    }
+
+    .detail-container > h1 {
+        font-size: 25px;
+    }
+
+    .book-detail-card {
+        padding: 20px;
+    }
+
+    .book-detail-card h2 {
+        font-size: 21px;
+    }
+
+    .detail-row {
+        grid-template-columns: 1fr;
+        gap: 5px;
+    }
+
+    .detail-row dt,
+    .detail-row dd {
+        font-size: 14px;
+    }
+}
