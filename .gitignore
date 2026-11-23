@@ -20,3 +20,6 @@ Thumbs.db
 # Pengaturan editor
 .vscode/
 .idea/
+
+# Pengujian rollback lokal
+/database/test-rollback.php
