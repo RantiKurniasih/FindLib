@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../includes/auth.php';
 
-// Wajib login untuk mengakses dashboard
 wajibLogin();
 
 $nama = htmlspecialchars(
@@ -31,6 +30,26 @@ $nama = htmlspecialchars(
     </p>
 
     <p>Anda berhasil login sebagai admin.</p>
+
+    <hr>
+
+    <h2>Menu Pengelolaan</h2>
+
+    <ul>
+        <li>
+            <a href="buku/index.php">Kelola Data Buku</a>
+        </li>
+
+        <li>
+            <a href="kategori/index.php">Kelola Kategori</a>
+        </li>
+
+        <li>
+            <a href="rak/index.php">Kelola Rak Buku</a>
+        </li>
+    </ul>
+
+    <hr>
 
     <form action="/FindLib/logout.php" method="POST">
         <input
