@@ -1,9 +1,25 @@
 <?php
-// Integrasi backend akan dilakukan setelah
-// fungsi getBookById($pdo, $id) tersedia.
-//
-// Untuk sementara, belum ada data buku.
+declare(strict_types=1);
+
+// Koneksi MySQL FINDLIB
+$pdo = require __DIR__ . '/config/database.php';
+
+// Menggunakan fungsi backend Rangga
+require_once __DIR__ . '/includes/functions.php';
+
+// Mengambil ID buku dari URL
+$id = filter_input(
+    INPUT_GET,
+    'id',
+    FILTER_VALIDATE_INT
+);
+
+// Mengambil detail buku dari MySQL
 $book = null;
+
+if ($id !== null && $id !== false && $id > 0) {
+    $book = getBookById($pdo, $id);
+}
 ?>
 
 <!DOCTYPE html>
