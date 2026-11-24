@@ -1,3 +1,30 @@
+<?php
+declare(strict_types=1);
+
+// Menggunakan koneksi database yang sudah tersedia
+$pdo = require __DIR__ . '/config/database.php';
+
+// Menggunakan fungsi backend Rangga
+require_once __DIR__ . '/includes/functions.php';
+
+// Mengambil input pencarian
+$keyword = trim((string)($_GET['keyword'] ?? ''));
+
+$categoryId = filter_input(
+    INPUT_GET,
+    'category',
+    FILTER_VALIDATE_INT
+);
+
+if (!$categoryId || $categoryId < 1) {
+    $categoryId = null;
+}
+
+// Mengambil data asli dari MySQL
+$books = getBooks($pdo, $keyword, $categoryId);
+$categories = getCategories($pdo);
+?>
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -63,12 +90,24 @@
                 <div class="category-filter">
     <label for="category">Kategori Buku</label>
 
-    <select id="category" name="category">
-        <option value="">Semua Kategori</option>
+<select id="category" name="category">
+    <option value="">Semua Kategori</option>
 
-        <!-- Pilihan kategori akan diambil
-             dari database melalui backend Rangga -->
-    </select>
+    <?php foreach ($categories as $category): ?>
+        <option
+            value="<?= (int)$category['id_kategori'] ?>"
+            <?= $categoryId === (int)$category['id_kategori']
+                ? 'selected'
+                : '' ?>
+        >
+            <?= htmlspecialchars(
+                (string)$category['nama_kategori'],
+                ENT_QUOTES,
+                'UTF-8'
+            ) ?>
+        </option>
+    <?php endforeach; ?>
+</select>
 </div>
                 <button type="submit">
                     Cari Buku
@@ -79,13 +118,6 @@
  <section class="catalog-results" aria-labelledby="catalog-title">
     <h2 id="catalog-title">Daftar Buku</h2>
 
-    <?php
-    // Nanti data buku diambil melalui:
-    // $books = getBooks($pdo, $keyword, $categoryId);
-
-    // Belum menggunakan database pada tahap ini.
-    $books = [];
-    ?>
 
     <?php if (!empty($books)): ?>
     <div class="book-grid">
