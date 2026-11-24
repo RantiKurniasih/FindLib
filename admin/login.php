@@ -1,9 +1,11 @@
 <?php
 declare(strict_types=1);
 
+// Koneksi database dan autentikasi dari backend Rangga
 $pdo = require __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../includes/auth.php';
 
+// Admin yang sudah login diarahkan ke dashboard
 if (!empty($_SESSION['admin_id'])) {
     requireAdmin($pdo);
 
@@ -14,10 +16,12 @@ if (!empty($_SESSION['admin_id'])) {
 $error = '';
 $identity = '';
 
+// Proses login admin
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $identity = trim(
         (string) ($_POST['identity'] ?? '')
     );
+
     $password = (string) ($_POST['password'] ?? '');
     $token = $_POST['csrf_token'] ?? null;
 
@@ -67,56 +71,106 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
     <title>Login Admin - FINDLIB</title>
+
+    <link
+        rel="stylesheet"
+        href="/FindLib/assets/css/admin.css"
+    >
 </head>
-<body>
 
-    <h1>FINDLIB</h1>
-    <h2>Login Admin</h2>
+<body class="admin-login-page">
 
-    <?php if ($error !== ''): ?>
-        <p role="alert"><?= e($error) ?></p>
-    <?php endif; ?>
+    <main class="login-container">
 
-    <form method="POST" action="login.php">
-        <input
-            type="hidden"
-            name="csrf_token"
-            value="<?= e(csrfToken()) ?>"
+        <!-- Judul halaman login -->
+        <header class="login-header">
+            <h1>FINDLIB</h1>
+            <h2>Login Admin</h2>
+        </header>
+
+        <!-- Pesan kesalahan login -->
+        <?php if ($error !== ''): ?>
+            <div class="login-error" role="alert">
+                <?= e($error) ?>
+            </div>
+        <?php endif; ?>
+
+        <!-- Formulir login admin -->
+        <form
+            method="POST"
+            action="login.php"
+            class="login-form"
         >
 
-        <p>
-            <label for="identity">Username atau Email</label>
+            <!-- Token keamanan CSRF -->
             <input
-                type="text"
-                id="identity"
-                name="identity"
-                value="<?= e($identity) ?>"
-                maxlength="150"
-                autocomplete="username"
-                required
+                type="hidden"
+                name="csrf_token"
+                value="<?= e(csrfToken()) ?>"
             >
-        </p>
 
-        <p>
-            <label for="password">Password</label>
-            <input
-                type="password"
-                id="password"
-                name="password"
-                autocomplete="current-password"
-                required
+            <!-- Username atau Email -->
+            <div class="login-field">
+                <label for="identity">
+                    Username atau Email
+                </label>
+
+                <input
+                    type="text"
+                    id="identity"
+                    name="identity"
+                    value="<?= e($identity) ?>"
+                    maxlength="150"
+                    autocomplete="username"
+                    required
+                >
+            </div>
+
+            <!-- Password -->
+            <div class="login-field">
+                <label for="password">
+                    Password
+                </label>
+
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    autocomplete="current-password"
+                    required
+                >
+            </div>
+
+            <!-- Tombol login -->
+            <button
+                type="submit"
+                class="login-button"
             >
-        </p>
+                Masuk
+            </button>
 
-        <button type="submit">Masuk</button>
-    </form>
+        </form>
+
+        <!-- Kembali ke halaman pengunjung -->
+        <a
+            href="/FindLib/index.php"
+            class="login-back"
+        >
+            &larr; Kembali ke Beranda
+        </a>
+
+    </main>
 
 </body>
 </html>

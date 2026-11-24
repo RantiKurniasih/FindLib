@@ -1,0 +1,352 @@
+/* =========================
+   FINDLIB - LOGIN ADMIN
+========================= */
+
+:root {
+    --admin-primary: #17365d;
+    --admin-dark: #102744;
+    --admin-bg: #f4f7fb;
+    --admin-border: #dce3ec;
+    --admin-text: #263445;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body.admin-login-page {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--admin-bg);
+    color: var(--admin-text);
+    font-family: Arial, Helvetica, sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.login-container {
+    width: 100%;
+    max-width: 430px;
+    background: #ffffff;
+    border: 1px solid var(--admin-border);
+    border-radius: 14px;
+    padding: 35px;
+    box-shadow: 0 10px 30px rgba(16, 39, 68, 0.08);
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: 28px;
+}
+
+.login-header h1 {
+    margin: 0 0 8px;
+    color: var(--admin-primary);
+    font-size: 32px;
+}
+
+.login-header h2 {
+    margin: 0;
+    color: var(--admin-text);
+    font-size: 21px;
+}
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.login-field label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.login-field input {
+    display: block;
+    width: 100%;
+    padding: 13px 14px;
+    border: 1px solid var(--admin-border);
+    border-radius: 8px;
+    background: #ffffff;
+    color: var(--admin-text);
+    font: inherit;
+}
+
+.login-field input:focus-visible,
+.login-button:focus-visible,
+.login-back:focus-visible {
+    outline: 3px solid #e9b949;
+    outline-offset: 2px;
+}
+
+.login-button {
+    width: 100%;
+    padding: 13px 16px;
+    border: none;
+    border-radius: 8px;
+    background: var(--admin-primary);
+    color: #ffffff;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.login-button:hover {
+    background: #24558b;
+}
+
+.login-error {
+    padding: 12px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    color: #991b1b;
+    background: #fee2e2;
+    font-size: 14px;
+}
+
+.login-back {
+    display: block;
+    margin-top: 24px;
+    text-align: center;
+    color: var(--admin-primary);
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.login-back:hover {
+    text-decoration: underline;
+}
+
+/* Responsif HP */
+@media (max-width: 600px) {
+    .login-container {
+        padding: 25px 20px;
+    }
+
+    .login-header h1 {
+        font-size: 28px;
+    }
+
+    .login-header h2 {
+        font-size: 19px;
+    }
+}
+
+/* =========================
+   DASHBOARD ADMIN FINDLIB
+========================= */
+
+body.admin-dashboard-page {
+    margin: 0;
+    min-height: 100vh;
+    background: #f4f7fb;
+    color: #263445;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.admin-layout {
+    display: grid;
+    grid-template-columns: 250px minmax(0, 1fr);
+    min-height: 100vh;
+}
+
+/* Sidebar */
+.admin-sidebar {
+    background: #17365d;
+    color: white;
+    padding: 28px 18px;
+}
+
+.sidebar-brand {
+    padding: 10px 12px 30px;
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+    margin-bottom: 25px;
+}
+
+.sidebar-brand h2 {
+    font-size: 24px;
+    margin: 0 0 8px;
+}
+
+.sidebar-brand p {
+    font-size: 13px;
+    color: #cbd5e1;
+    margin: 0;
+}
+
+.admin-sidebar nav {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.sidebar-link {
+    display: block;
+    padding: 13px 15px;
+    color: #e2e8f0;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.sidebar-link.active {
+    background: #2563eb;
+    color: #ffffff;
+}
+
+.sidebar-link.disabled {
+    color: #94a3b8;
+    cursor: default;
+}
+
+/* Konten utama */
+.admin-main {
+    min-width: 0;
+    padding: 30px;
+}
+
+.admin-topbar {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 25px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.admin-topbar h1 {
+    margin: 0 0 10px;
+    color: #17365d;
+    font-size: 26px;
+}
+
+.admin-topbar p {
+    margin: 0;
+    font-size: 14px;
+    color: #64748b;
+}
+
+/* Tombol Logout */
+.admin-logout-button {
+    background: #dc2626;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 18px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.admin-logout-button:hover {
+    background: #b91c1c;
+}
+
+/* Selamat datang */
+.admin-welcome {
+    margin-top: 25px;
+    padding: 30px;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+}
+
+.admin-welcome h2 {
+    color: #17365d;
+    margin: 0 0 12px;
+    font-size: 23px;
+}
+
+.admin-welcome p {
+    margin: 0;
+    color: #64748b;
+}
+
+/* Statistik */
+.admin-statistics {
+    margin-top: 30px;
+}
+
+.admin-statistics > h2 {
+    color: #17365d;
+    font-size: 22px;
+    margin-bottom: 20px;
+}
+
+.admin-placeholder {
+    padding: 35px;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+}
+
+.admin-placeholder h3 {
+    color: #17365d;
+    margin: 0 0 12px;
+}
+
+.admin-placeholder p {
+    color: #64748b;
+    line-height: 1.7;
+}
+
+/* Responsif tablet dan HP */
+@media (max-width: 768px) {
+    .admin-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-sidebar {
+        padding: 18px;
+    }
+
+    .sidebar-brand {
+        padding-bottom: 15px;
+        margin-bottom: 15px;
+    }
+
+    .admin-sidebar nav {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+
+    .sidebar-link {
+        padding: 10px 12px;
+    }
+
+    .admin-main {
+        padding: 18px;
+    }
+
+    .admin-topbar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .admin-topbar h1 {
+        font-size: 23px;
+    }
+
+    .admin-welcome {
+        padding: 22px;
+    }
+
+    .admin-placeholder {
+        padding: 22px;
+    }
+}
+
+/* Fokus keyboard */
+.sidebar-link:focus-visible,
+.admin-logout-button:focus-visible {
+    outline: 3px solid #facc15;
+    outline-offset: 3px;
+}
