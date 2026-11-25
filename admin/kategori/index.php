@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../../includes/auth.php';
-require_once __DIR__ . '/../../config/database.php';
+$pdo = require __DIR__ . '/../../config/database.php';
 
 wajibLogin();
 
@@ -22,8 +22,9 @@ $kategori = $stmt->fetchAll();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kelola Kategori - FINDLIB</title>
+    <link rel="stylesheet" href="../../assets/css/admin.css">
 </head>
-<body>
+<body class="kategori-page">
 
     <h1>Kelola Kategori</h1>
     <p>Daftar seluruh kategori buku FINDLIB.</p>
@@ -33,7 +34,7 @@ $kategori = $stmt->fetchAll();
 
     <br><br>
 
-    <table border="1" cellpadding="10" cellspacing="0">
+<table class="kategori-table">
         <thead>
             <tr>
                 <th>No.</th>

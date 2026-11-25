@@ -19,100 +19,104 @@ $accounts = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kelola Akun - FINDLIB</title>
+    <link rel="stylesheet" href="../../assets/css/admin.css">
 </head>
-<body>
+<body class="akun-page">
 
-<h1>Kelola Akun FINDLIB</h1>
+    <main class="akun-container">
+        <h1>Kelola Akun FINDLIB</h1>
 
-<p>
-    Login sebagai: <?= e($admin['nama']) ?>
-</p>
+        <p class="akun-login">
+            Login sebagai: <?= e($admin['nama']) ?>
+        </p>
 
-<p>
-    <a href="../dashboard.php">Kembali ke Dashboard</a>
-</p>
+        <div class="akun-actions">
+            <a href="../dashboard.php" class="akun-back">
+                Kembali ke Dashboard
+            </a>
 
-<h2>Daftar Akun Pengelola</h2>
+            <a href="tambah.php" class="akun-add">
+                + Tambah Akun
+            </a>
+        </div>
 
-<p>
-    <a href="tambah.php">+ Tambah Akun</a>
-</p>
+        <h2>Daftar Akun Pengelola</h2>
 
-<table border="1" cellpadding="8">
-    <thead>
-        <tr>
-            <th>No.</th>
-            <th>Nama</th>
-            <th>Username</th>
-            <th>Email</th>
-            <th>Status</th>
-            <th>Aksi</th>
-        </tr>
-    </thead>
-    <tbody>
-        <?php if (empty($accounts)): ?>
-            <tr>
-                <td colspan="6">
-                    Belum ada akun pengelola.
-                </td>
-            </tr>
-        <?php else: ?>
-            <?php foreach ($accounts as $i => $account): ?>
-                <?php
-                $id = (int) $account['id_pengguna'];
-                $aktif = (int) $account['status_aktif'] === 1;
-                $akunSendiri =
-                    $id === (int) $admin['id_pengguna'];
-                ?>
-                <tr>
-                    <td><?= $i + 1 ?></td>
-                    <td><?= e($account['nama']) ?></td>
-                    <td><?= e($account['username']) ?></td>
-                    <td><?= e($account['email']) ?></td>
-                    <td>
-                        <?= $aktif ? 'Aktif' : 'Nonaktif' ?>
-                    </td>
-                    <td>
-                        <a href="edit.php?id=<?= $id ?>">
-                            Edit
-                        </a>
+        <div class="akun-table-wrapper">
+            <table class="akun-table">
+                <thead>
+                    <tr>
+                        <th>No.</th>
+                        <th>Nama</th>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Status</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
 
-                        <a href="password.php?id=<?= $id ?>">
-                            Ganti Password
-                        </a>
+                <tbody>
+                    <?php if (empty($accounts)): ?>
+                        <tr>
+                            <td colspan="6" class="akun-empty">
+                                Belum ada akun pengelola.
+                            </td>
+                        </tr>
+                    <?php else: ?>
+                        <?php foreach ($accounts as $i => $account): ?>
+                            <?php
+                            $id = (int) $account['id_pengguna'];
+                            $aktif = (int) $account['status_aktif'] === 1;
+                            $akunSendiri = $id === (int) $admin['id_pengguna'];
+                            ?>
+                            <tr>
+                                <td><?= $i + 1 ?></td>
+                                <td><?= e($account['nama']) ?></td>
+                                <td><?= e($account['username']) ?></td>
+                                <td><?= e($account['email']) ?></td>
+                                <td>
+                                    <span class="<?= $aktif ? 'akun-status-aktif' : 'akun-status-nonaktif' ?>">
+                                        <?= $aktif ? 'Aktif' : 'Nonaktif' ?>
+                                    </span>
+                                </td>
+                                <td class="akun-action-cell">
+                                    <a href="edit.php?id=<?= $id ?>" class="akun-edit">
+                                        Edit
+                                    </a>
 
-                        <?php if (!$akunSendiri): ?>
-                            <form method="POST"
-                                  action="status.php"
-                                  style="display:inline">
-                                <input
-                                    type="hidden"
-                                    name="csrf_token"
-                                    value="<?= e(csrfToken()) ?>"
-                                >
-                                <input
-                                    type="hidden"
-                                    name="id"
-                                    value="<?= $id ?>"
-                                >
-                                <button type="submit">
-                                    <?= $aktif
-                                        ? 'Nonaktifkan'
-                                        : 'Aktifkan' ?>
-                                </button>
-                            </form>
-                        <?php else: ?>
-                            <small>(Akun sendiri)</small>
-                        <?php endif; ?>
-                    </td>
-                </tr>
-            <?php endforeach; ?>
-        <?php endif; ?>
-    </tbody>
-</table>
+                                    <a href="password.php?id=<?= $id ?>" class="akun-password">
+                                        Ganti Password
+                                    </a>
+
+                                    <?php if (!$akunSendiri): ?>
+                                        <form method="POST" action="status.php">
+                                            <input
+                                                type="hidden"
+                                                name="csrf_token"
+                                                value="<?= e(csrfToken()) ?>"
+                                            >
+                                            <input
+                                                type="hidden"
+                                                name="id"
+                                                value="<?= $id ?>"
+                                            >
+                                            <button type="submit" class="<?= $aktif ? 'akun-disable' : 'akun-enable' ?>">
+                                                <?= $aktif ? 'Nonaktifkan' : 'Aktifkan' ?>
+                                            </button>
+                                        </form>
+                                    <?php else: ?>
+                                        <small>Akun sendiri</small>
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+    </main>
 
 </body>
 </html>

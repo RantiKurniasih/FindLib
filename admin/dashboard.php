@@ -10,64 +10,66 @@ $admin = requireAdmin($pdo);
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Dashboard Admin - FINDLIB</title>
 
-    <link
-        rel="stylesheet"
-        href="/FindLib/assets/css/admin.css"
-    >
+    <link rel="stylesheet" href="/FindLib/assets/css/admin.css">
 </head>
 <body class="admin-dashboard-page">
 
     <div class="admin-layout">
 
+        <!-- SIDEBAR -->
         <aside class="admin-sidebar">
+
             <div class="sidebar-brand">
                 <h2>📚 FINDLIB</h2>
                 <p>Panel Administrator</p>
             </div>
 
-            <nav aria-label="Navigasi admin">
+            <nav class="admin-sidebar-nav" aria-label="Navigasi admin">
 
                 <a href="/FindLib/admin/dashboard.php"
                    class="sidebar-link active"
                    aria-current="page">
-                    Dashboard
+                    <span>Dashboard</span>
                 </a>
 
                 <a href="/FindLib/admin/buku/index.php"
                    class="sidebar-link">
-                    Data Buku
+                    <span>Data Buku</span>
                 </a>
 
                 <a href="/FindLib/admin/kategori/index.php"
                    class="sidebar-link">
-                    Kategori Buku
+                    <span>Kategori Buku</span>
                 </a>
 
                 <a href="/FindLib/admin/rak/index.php"
                    class="sidebar-link">
-                    Lokasi Rak
+                    <span>Lokasi Rak</span>
                 </a>
 
                 <a href="/FindLib/admin/akun/index.php"
                    class="sidebar-link">
-                    Akun Admin
+                    <span>Akun Admin</span>
                 </a>
 
-                <span class="sidebar-link disabled">
-                    Riwayat Stok
-                </span>
+                <a href="/FindLib/admin/riwayat-stok/index.php"
+                   class="sidebar-link">
+                    <span>Riwayat Stok</span>
+                </a>
 
             </nav>
+
         </aside>
 
+        <!-- KONTEN UTAMA -->
         <main class="admin-main">
 
             <header class="admin-topbar">
+
                 <div>
                     <h1>Dashboard FINDLIB</h1>
                     <p>
@@ -83,15 +85,14 @@ $admin = requireAdmin($pdo);
                         value="<?= e(csrfToken()) ?>"
                     >
 
-                    <button
-                        type="submit"
-                        class="admin-logout-button"
-                    >
+                    <button type="submit" class="admin-logout-button">
                         Logout
                     </button>
                 </form>
+
             </header>
 
+            <!-- SAMBUTAN ADMIN -->
             <section class="admin-welcome">
                 <h2>
                     Selamat datang,
@@ -104,10 +105,12 @@ $admin = requireAdmin($pdo);
                 </p>
             </section>
 
+            <!-- STATISTIK -->
             <section
                 class="admin-statistics"
                 aria-labelledby="statistics-title"
             >
+
                 <h2 id="statistics-title">
                     Ringkasan Koleksi Buku
                 </h2>
@@ -123,6 +126,7 @@ $admin = requireAdmin($pdo);
                         backend selesai diintegrasikan.
                     </p>
                 </div>
+
             </section>
 
         </main>

@@ -9,14 +9,10 @@ $keyword = is_string($keyword) ? trim($keyword) : '';
 
 $categoryId = $_GET['category'] ?? null;
 
-if (
-    !is_string($categoryId)
-    || !ctype_digit($categoryId)
-    || (int) $categoryId < 1
-) {
-    $categoryId = null;
-} else {
+if ($categoryId !== null && $categoryId !== '' && ctype_digit((string) $categoryId)) {
     $categoryId = (int) $categoryId;
+} else {
+    $categoryId = null;
 }
 
 try {
@@ -24,8 +20,10 @@ try {
     $books = getBooks($pdo, $keyword, $categoryId);
 } catch (PDOException $e) {
     error_log('Catalog error: ' . $e->getMessage());
-    http_response_code(500);
-    exit('Terjadi kesalahan saat memuat katalog buku.');
+
+    $categories = [];
+    $books = [];
+    $error = 'Terjadi kesalahan saat mengambil data buku.';
 }
 ?>
 <!DOCTYPE html>
@@ -34,80 +32,103 @@ try {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Katalog Buku - FINDLIB</title>
+    <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
 
-    <h1>Katalog Buku FINDLIB</h1>
+    <header class="navbar">
+        <a href="index.php" class="logo">FINDLIB</a>
+        <nav class="nav-menu">
+            <a href="index.php">Beranda</a>
+            <a href="katalog.php">Katalog Buku</a>
+            <a href="admin/login.php">Login Admin</a>
+        </nav>
+    </header>
 
-    <p>
-        <a href="index.php">Beranda</a> |
-        <a href="/FindLib/admin/login.php">Login Admin</a>
-    </p>
+    <main class="features">
+        <h1>Jelajahi Katalog Buku</h1>
+        <p>Temukan informasi ketersediaan buku di Ruang Baca FMIPA UHO.</p>
 
-    <form method="GET" action="katalog.php">
-        <input
-            type="text"
-            name="keyword"
-            placeholder="Cari judul atau penulis buku..."
-            value="<?= htmlspecialchars($keyword, ENT_QUOTES, 'UTF-8') ?>"
-        >
+        <div class="search-box">
+            <form method="GET" action="katalog.php">
+                <label for="keyword">Cari Buku</label>
 
-        <select name="category">
-            <option value="">Semua Kategori</option>
+                <div class="search-input">
+                    <input
+                        type="text"
+                        id="keyword"
+                        name="keyword"
+                        placeholder="Masukkan judul atau nama penulis..."
+                        value="<?= htmlspecialchars($keyword, ENT_QUOTES, 'UTF-8') ?>"
+                    >
 
-            <?php foreach ($categories as $category): ?>
-                <option
-                    value="<?= (int) $category['id_kategori'] ?>"
-                    <?= $categoryId === (int) $category['id_kategori'] ? 'selected' : '' ?>
-                >
-                    <?= htmlspecialchars($category['nama_kategori'], ENT_QUOTES, 'UTF-8') ?>
-                </option>
-            <?php endforeach; ?>
-        </select>
+                    <select name="category">
+                        <option value="">Semua Kategori</option>
+                        <?php foreach ($categories as $category): ?>
+                            <option
+                                value="<?= (int) $category['id_kategori'] ?>"
+                                <?= $categoryId === (int) $category['id_kategori'] ? 'selected' : '' ?>
+                            >
+                                <?= htmlspecialchars($category['nama_kategori'], ENT_QUOTES, 'UTF-8') ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
 
-        <button type="submit">Cari</button>
-        <a href="katalog.php">Reset</a>
-    </form>
+                    <button type="submit">Cari</button>
+                </div>
+            </form>
 
-    <hr>
+            <a href="katalog.php">Reset Pencarian</a>
+        </div>
 
-    <?php if (empty($books)): ?>
-        <p>Buku tidak ditemukan.</p>
-    <?php else: ?>
-        <?php foreach ($books as $book): ?>
-            <article>
-                <h2>
-                    <?= htmlspecialchars($book['judul'], ENT_QUOTES, 'UTF-8') ?>
-                </h2>
+        <?php if (isset($error)): ?>
+            <p><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></p>
 
-                <p>
-                    Penulis:
-                    <?= htmlspecialchars($book['penulis'], ENT_QUOTES, 'UTF-8') ?>
-                </p>
+        <?php elseif (empty($books)): ?>
+            <div class="empty-state">
+                <p>Buku tidak ditemukan.</p>
+                <a href="katalog.php" class="book-detail-link">Lihat Semua Buku</a>
+            </div>
 
-                <p>
-                    Kategori:
-                    <?= htmlspecialchars($book['nama_kategori'], ENT_QUOTES, 'UTF-8') ?>
-                </p>
+        <?php else: ?>
+            <div class="book-grid">
+                <?php foreach ($books as $book): ?>
+                    <article class="book-card">
+                        <div class="book-info">
+                            <span class="book-category">
+                                <?= htmlspecialchars($book['nama_kategori'], ENT_QUOTES, 'UTF-8') ?>
+                            </span>
 
-                <p>
-                    Stok: <?= (int) $book['jumlah_stok'] ?>
-                </p>
+                            <h3>
+                                <?= htmlspecialchars($book['judul'], ENT_QUOTES, 'UTF-8') ?>
+                            </h3>
 
-                <p>
-                    Status:
-                    <?= (int) $book['jumlah_stok'] > 0
-                        ? 'Tersedia'
-                        : 'Tidak tersedia' ?>
-                </p>
+                            <p class="book-author">
+                                Penulis:
+                                <?= htmlspecialchars($book['penulis'], ENT_QUOTES, 'UTF-8') ?>
+                            </p>
 
-                <a href="detail-buku.php?id=<?= (int) $book['id_buku'] ?>">
-                    Lihat Detail
-                </a>
-            </article>
-            <hr>
-        <?php endforeach; ?>
-    <?php endif; ?>
+                            <p>Stok: <?= (int) $book['jumlah_stok'] ?></p>
+
+                            <p>
+                                Status:
+                                <?= (int) $book['jumlah_stok'] > 0
+                                    ? 'Tersedia'
+                                    : 'Tidak tersedia' ?>
+                            </p>
+
+                            <a
+                                href="detail-buku.php?id=<?= (int) $book['id_buku'] ?>"
+                                class="book-detail-link"
+                            >
+                                Lihat Detail
+                            </a>
+                        </div>
+                    </article>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
+    </main>
 
 </body>
 </html>
