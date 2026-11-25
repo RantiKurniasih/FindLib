@@ -41,14 +41,14 @@ Keterangan:
 | DB-08 | Status stok = 0 | Tidak Tersedia | Lulus |
 | DB-09 | Buat admin | Akun admin berhasil dibuat | Lulus |
 | DB-10 | Verifikasi password | password_verify() berhasil | Lulus |
-| DB-11 | Nomor katalog duplikat | INSERT ditolak | Belum diuji |
-| DB-12 | Stok negatif | UPDATE ditolak | Belum diuji |
-| DB-13 | Foreign Key tidak valid | INSERT ditolak | Belum diuji |
-| DB-14 | Pembaruan stok | stock_updated_at berubah | Belum diuji |
-| DB-15 | Perubahan judul | stock_updated_at tetap | Belum diuji |
-| DB-16 | Riwayat perubahan stok | Riwayat tersimpan | Belum diuji |
-| DB-17 | Transaksi gagal | ROLLBACK berhasil | Belum diuji |
-| DB-18 | Jalankan seed ulang | Tidak menambah buku duplikat | Belum diuji |
+| DB-11 | Nomor katalog duplikat | INSERT ditolak | Lulus |
+| DB-12 | Stok negatif | UPDATE ditolak | Lulus |
+| DB-13 | Foreign Key tidak valid | INSERT ditolak | Lulus |
+| DB-14 | Pembaruan stok | stock_updated_at berubah | Lulus |
+| DB-15 | Perubahan judul | stock_updated_at tetap | Lulus |
+| DB-16 | Riwayat perubahan stok | Riwayat dapat dicatat dalam transaksi | Lulus (uji SQL) |
+| DB-17 | Transaksi gagal | ROLLBACK berhasil | Lulus (uji PDO lokal) |
+| DB-18 | Jalankan seed ulang | Tidak menambah buku duplikat | Lulus |
 
 ## 4. Query Pengujian
 
@@ -191,16 +191,36 @@ Data dummy terdiri dari:
 Data tersebut bukan koleksi asli
 Ruang Baca FMIPA Universitas Halu Oleo.
 
-## 6. Kesimpulan Sementara
+## 6. Kesimpulan Pengujian
 
-Struktur database, relasi Foreign Key,
-view katalog, trigger, koneksi PDO,
-data dummy, dan verifikasi password admin
-telah melalui pengujian awal.
+Berdasarkan hasil pengujian database FINDLIB,
+seluruh 18 skenario pengujian awal telah dilaksanakan
+dan menunjukkan hasil yang sesuai.
 
-Pengujian constraint negatif,
-perubahan stok, pencatatan riwayat,
-dan transaksi database masih perlu dilakukan.
+Hasil pengujian meliputi:
 
-Status pengujian akan diperbarui
-setelah seluruh skenario selesai dijalankan.
+1. Struktur lima tabel berhasil dibuat.
+2. Relasi Foreign Key berhasil diperiksa.
+3. Trigger pembaruan stok berfungsi.
+4. Data dummy berhasil dimasukkan.
+5. Status ketersediaan sesuai jumlah stok.
+6. Password admin berhasil diverifikasi.
+7. Nomor katalog duplikat berhasil ditolak.
+8. Stok negatif berhasil ditolak.
+9. Foreign Key tidak valid berhasil ditolak.
+10. Perubahan stok memperbarui stock_updated_at.
+11. Perubahan judul tidak mengubah stock_updated_at.
+12. Transaksi stok dan riwayat berhasil diuji.
+13. ROLLBACK PDO berhasil ketika terjadi kesalahan.
+14. Seed ulang tidak menambahkan buku duplikat.
+
+Pengujian DB-16 dan DB-17 dilakukan pada tingkat
+database dan PDO lokal.
+
+Pengujian integrasi dengan backend PHP Native
+dan pengujian website secara keseluruhan
+masih perlu dilaksanakan bersama tim pengembang.
+
+Seluruh data buku yang digunakan merupakan data
+dummy, bukan koleksi asli Ruang Baca FMIPA
+Universitas Halu Oleo.

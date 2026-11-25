@@ -1,16 +1,10 @@
 <?php
 declare(strict_types=1);
 
+$pdo = require __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../includes/auth.php';
 
-wajibLogin();
-
-$nama = htmlspecialchars(
-    $_SESSION['nama'],
-    ENT_QUOTES,
-    'UTF-8'
-);
-
+$admin = requireAdmin($pdo);
 ?>
 
 <!DOCTYPE html>
@@ -26,40 +20,29 @@ $nama = htmlspecialchars(
 
     <p>
         Selamat datang,
-        <strong><?= $nama ?></strong>!
+        <strong><?= e($admin['nama']) ?></strong>!
     </p>
 
-    <p>Anda berhasil login sebagai admin.</p>
+    <p>Anda berhasil login sebagai pengelola FINDLIB.</p>
 
     <hr>
 
     <h2>Menu Pengelolaan</h2>
 
     <ul>
-        <li>
-            <a href="buku/index.php">Kelola Data Buku</a>
-        </li>
-
-        <li>
-            <a href="kategori/index.php">Kelola Kategori</a>
-        </li>
-
-        <li>
-            <a href="rak/index.php">Kelola Rak Buku</a>
-        </li>
+        <li><a href="buku/index.php">Kelola Data Buku</a></li>
+        <li><a href="kategori/index.php">Kelola Kategori</a></li>
+        <li><a href="rak/index.php">Kelola Rak Buku</a></li>
+        <li><a href="akun/index.php">Kelola Akun Admin</a></li>
     </ul>
 
     <hr>
 
-    <form action="/FindLib/logout.php" method="POST">
+    <form method="POST" action="logout.php">
         <input
             type="hidden"
             name="csrf_token"
-            value="<?= htmlspecialchars(
-                $_SESSION['csrf_token'],
-                ENT_QUOTES,
-                'UTF-8'
-            ) ?>"
+            value="<?= e(csrfToken()) ?>"
         >
 
         <button type="submit">Logout</button>
