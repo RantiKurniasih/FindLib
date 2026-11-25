@@ -25,3 +25,8 @@ Thumbs.db
 
 # Pengujian rollback lokal
 /database/test-rollback.php
+
+# Pengujian integrasi lokal
+/database/test-getbooks.php
+/database/test-pdo.php
+/fetchColumn()
