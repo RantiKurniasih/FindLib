@@ -1,11 +1,9 @@
 <?php
 declare(strict_types=1);
 
-// Koneksi dan autentikasi backend Rangga
 $pdo = require __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../includes/auth.php';
 
-// Memastikan hanya admin yang dapat mengakses
 $admin = requireAdmin($pdo);
 ?>
 <!DOCTYPE html>
@@ -26,7 +24,6 @@ $admin = requireAdmin($pdo);
 
     <div class="admin-layout">
 
-        <!-- Sidebar Dashboard -->
         <aside class="admin-sidebar">
             <div class="sidebar-brand">
                 <h2>📚 FINDLIB</h2>
@@ -34,39 +31,40 @@ $admin = requireAdmin($pdo);
             </div>
 
             <nav aria-label="Navigasi admin">
-                <a
-                    href="/FindLib/admin/dashboard.php"
-                    class="sidebar-link active"
-                    aria-current="page"
-                >
+
+                <a href="/FindLib/admin/dashboard.php"
+                   class="sidebar-link active"
+                   aria-current="page">
                     Dashboard
                 </a>
 
-                <!-- Menu ini diaktifkan setelah
-                     halaman CRUD tersedia -->
-                <span class="sidebar-link disabled">
+                <a href="/FindLib/admin/buku/index.php"
+                   class="sidebar-link">
                     Data Buku
-                </span>
+                </a>
 
-                <span class="sidebar-link disabled">
+                <a href="/FindLib/admin/kategori/index.php"
+                   class="sidebar-link">
                     Kategori Buku
-                </span>
+                </a>
 
-                <span class="sidebar-link disabled">
+                <a href="/FindLib/admin/rak/index.php"
+                   class="sidebar-link">
                     Lokasi Rak
-                </span>
+                </a>
 
-                <span class="sidebar-link disabled">
+                <a href="/FindLib/admin/akun/index.php"
+                   class="sidebar-link">
                     Akun Admin
-                </span>
+                </a>
 
                 <span class="sidebar-link disabled">
                     Riwayat Stok
                 </span>
+
             </nav>
         </aside>
 
-        <!-- Konten Dashboard -->
         <main class="admin-main">
 
             <header class="admin-topbar">
@@ -78,11 +76,7 @@ $admin = requireAdmin($pdo);
                     </p>
                 </div>
 
-                <!-- Logout backend Rangga -->
-                <form
-                    method="POST"
-                    action="logout.php"
-                >
+                <form method="POST" action="logout.php">
                     <input
                         type="hidden"
                         name="csrf_token"
@@ -98,7 +92,6 @@ $admin = requireAdmin($pdo);
                 </form>
             </header>
 
-            <!-- Pesan Selamat Datang -->
             <section class="admin-welcome">
                 <h2>
                     Selamat datang,
@@ -111,7 +104,6 @@ $admin = requireAdmin($pdo);
                 </p>
             </section>
 
-            <!-- Area Statistik -->
             <section
                 class="admin-statistics"
                 aria-labelledby="statistics-title"
