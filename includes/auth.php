@@ -3,24 +3,11 @@ declare(strict_types=1);
 
 const FINDLIB_BASE_URL = '/FindLib';
 
-if (session_status() === PHP_SESSION_NONE) {
-    $https = !empty($_SERVER['HTTPS'])
-        && $_SERVER['HTTPS'] !== 'off';
+require_once __DIR__ . '/session.php';
 
-    ini_set('session.use_strict_mode', '1');
-    ini_set('session.use_only_cookies', '1');
-
-    session_set_cookie_params([
-        'lifetime' => 0,
-        'path' => FINDLIB_BASE_URL,
-        'secure' => $https,
-        'httponly' => true,
-        'samesite' => 'Lax'
-    ]);
-
-    session_start();
-}
-
+/**
+ * Mengamankan output HTML.
+ */
 function e(mixed $value): string
 {
     return htmlspecialchars(
@@ -30,6 +17,9 @@ function e(mixed $value): string
     );
 }
 
+/**
+ * Membuat token CSRF.
+ */
 function csrfToken(): string
 {
     if (empty($_SESSION['csrf_token'])) {
@@ -41,6 +31,9 @@ function csrfToken(): string
     return $_SESSION['csrf_token'];
 }
 
+/**
+ * Memeriksa token CSRF.
+ */
 function verifyCsrf(?string $token): bool
 {
     return is_string($token)
@@ -48,14 +41,52 @@ function verifyCsrf(?string $token): bool
         && hash_equals($_SESSION['csrf_token'], $token);
 }
 
+/**
+ * Memeriksa status login.
+ */
+function sudahLogin(): bool
+{
+    return isset($_SESSION['admin_id']);
+}
+
+/**
+ * Mengambil ID admin yang sedang login.
+ */
+function idPenggunaLogin(): ?int
+{
+    return sudahLogin()
+        ? (int) $_SESSION['admin_id']
+        : null;
+}
+
+/**
+ * Mengambil username admin.
+ */
+function usernameLogin(): ?string
+{
+    return isset($_SESSION['username'])
+        ? (string) $_SESSION['username']
+        : null;
+}
+
+/**
+ * Memastikan admin sudah login.
+ */
+function wajibLogin(): void
+{
+    if (!sudahLogin()) {
+        header('Location: ' . FINDLIB_BASE_URL . '/admin/login.php');
+        exit;
+    }
+}
+
+/**
+ * Memeriksa login dan status aktif admin melalui database.
+ */
 function requireAdmin(PDO $pdo): array
 {
-    if (empty($_SESSION['admin_id'])) {
-        header(
-            'Location: ' .
-            FINDLIB_BASE_URL .
-            '/admin/login.php'
-        );
+    if (!sudahLogin()) {
+        header('Location: ' . FINDLIB_BASE_URL . '/admin/login.php');
         exit;
     }
 
@@ -68,22 +99,44 @@ function requireAdmin(PDO $pdo): array
     );
 
     $stmt->execute([
-        'id' => (int) $_SESSION['admin_id']
+        'id' => idPenggunaLogin()
     ]);
 
     $admin = $stmt->fetch();
 
     if (!$admin || (int) $admin['status_aktif'] !== 1) {
-        $_SESSION = [];
-        session_regenerate_id(true);
+        logoutPengguna();
 
-        header(
-            'Location: ' .
-            FINDLIB_BASE_URL .
-            '/admin/login.php'
-        );
+        header('Location: ' . FINDLIB_BASE_URL . '/admin/login.php');
         exit;
     }
 
     return $admin;
+}
+
+/**
+ * Mengakhiri session admin.
+ */
+function logoutPengguna(): void
+{
+    $_SESSION = [];
+
+    if (ini_get('session.use_cookies')) {
+        $params = session_get_cookie_params();
+
+        setcookie(
+            session_name(),
+            '',
+            [
+                'expires' => time() - 42000,
+                'path' => $params['path'],
+                'domain' => $params['domain'],
+                'secure' => $params['secure'],
+                'httponly' => $params['httponly'],
+                'samesite' => $params['samesite'] ?? 'Lax'
+            ]
+        );
+    }
+
+    session_destroy();
 }
