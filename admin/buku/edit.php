@@ -6,7 +6,6 @@ require_once __DIR__ . '/../../config/database.php';
 
 wajibLogin();
 
-// Validasi ID buku
 $id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 
 if (!$id || $id < 1) {
@@ -14,7 +13,6 @@ if (!$id || $id < 1) {
     exit('ID buku tidak valid.');
 }
 
-// Ambil data buku
 $stmt = $pdo->prepare(
     "SELECT * FROM buku WHERE id_buku = :id"
 );
@@ -26,7 +24,6 @@ if (!$buku) {
     exit('Data buku tidak ditemukan.');
 }
 
-// Ambil kategori dan lokasi rak
 $kategori = $pdo->query(
     "SELECT id_kategori, nama_kategori
      FROM kategori ORDER BY nama_kategori"
@@ -37,7 +34,6 @@ $rak = $pdo->query(
      FROM lokasi_rak ORDER BY kode_rak"
 )->fetchAll();
 
-// Token CSRF
 if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
@@ -131,6 +127,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
+
+function h(mixed $value): string
+{
+    return htmlspecialchars(
+        (string) $value,
+        ENT_QUOTES | ENT_SUBSTITUTE,
+        'UTF-8'
+    );
+}
+
+$values = [
+    'no_katalog' => $_POST['no_katalog'] ?? $buku['no_katalog'],
+    'judul' => $_POST['judul'] ?? $buku['judul'],
+    'penulis' => $_POST['penulis'] ?? $buku['penulis'],
+    'penerbit' => $_POST['penerbit'] ?? $buku['penerbit'],
+    'tahun_terbit' => $_POST['tahun_terbit'] ?? $buku['tahun_terbit'],
+    'id_kategori' => $_POST['id_kategori'] ?? $buku['id_kategori'],
+    'id_rak' => $_POST['id_rak'] ?? $buku['id_rak'],
+    'jumlah_stok' => $_POST['jumlah_stok'] ?? $buku['jumlah_stok']
+];
 ?>
 
 <!DOCTYPE html>
@@ -139,88 +155,249 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Buku - FINDLIB</title>
+    <link rel="stylesheet" href="/FindLib/assets/css/style.css">
+
+    <style>
+        .form-container {
+            max-width: 750px;
+            margin: 45px auto;
+            padding: 20px;
+        }
+
+        .form-card {
+            background: white;
+            padding: 30px;
+            border-radius: 14px;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.08);
+        }
+
+        .form-card h1 {
+            color: #173b70;
+            margin-bottom: 10px;
+        }
+
+        .form-description {
+            color: #666;
+            margin-bottom: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #263b59;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccd5e0;
+            border-radius: 7px;
+            box-sizing: border-box;
+            font-size: 15px;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #2457a7;
+            box-shadow: 0 0 0 2px rgba(36,87,167,0.12);
+        }
+
+        .error-message {
+            background: #fde4e4;
+            color: #a52222;
+            padding: 13px;
+            border-radius: 7px;
+            margin-bottom: 20px;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 25px;
+            flex-wrap: wrap;
+        }
+
+        .save-button,
+        .cancel-button {
+            display: inline-block;
+            padding: 12px 22px;
+            border: none;
+            border-radius: 7px;
+            text-decoration: none;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: bold;
+        }
+
+        .save-button {
+            background: #2457a7;
+            color: white;
+        }
+
+        .save-button:hover {
+            background: #173b70;
+        }
+
+        .cancel-button {
+            background: #e8edf4;
+            color: #263b59;
+        }
+
+        .cancel-button:hover {
+            background: #d5deea;
+        }
+
+        @media (max-width: 600px) {
+            .form-container {
+                margin: 20px auto;
+                padding: 15px;
+            }
+
+            .form-card {
+                padding: 20px;
+            }
+        }
+    </style>
 </head>
 <body>
 
-<h2>Edit Buku</h2>
+<header>
+    <nav class="navbar">
+        <div class="logo">📚 FINDLIB Admin</div>
 
-<?php if ($error !== ''): ?>
-    <p style="color:red;">
-        <?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?>
-    </p>
-<?php endif; ?>
+        <ul class="nav-menu">
+            <li><a href="/FindLib/index.php">Beranda</a></li>
+            <li><a href="/FindLib/katalog.php">Katalog Buku</a></li>
+            <li><a href="/FindLib/admin/dashboard.php">Dashboard Admin</a></li>
+        </ul>
+    </nav>
+</header>
 
-<form method="POST">
+<main class="form-container">
 
-    <input type="hidden" name="csrf_token"
-        value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
+    <section class="form-card">
+        <h1>Edit Buku</h1>
 
+        <p class="form-description">
+            Perbarui informasi buku dalam koleksi FINDLIB.
+        </p>
+
+        <?php if ($error !== ''): ?>
+            <div class="error-message">
+                <?= h($error) ?>
+            </div>
+        <?php endif; ?>
+
+        <form method="POST">
+
+            <input
+                type="hidden"
+                name="csrf_token"
+                value="<?= h($_SESSION['csrf_token']) ?>"
+            >
+
+            <div class="form-group">
+                <label for="no_katalog">Nomor Katalog</label>
+                <input type="text" id="no_katalog" name="no_katalog"
+                       value="<?= h($values['no_katalog']) ?>" required>
+            </div>
+
+            <div class="form-group">
+                <label for="judul">Judul Buku</label>
+                <input type="text" id="judul" name="judul"
+                       value="<?= h($values['judul']) ?>" required>
+            </div>
+
+            <div class="form-group">
+                <label for="penulis">Penulis</label>
+                <input type="text" id="penulis" name="penulis"
+                       value="<?= h($values['penulis']) ?>" required>
+            </div>
+
+            <div class="form-group">
+                <label for="penerbit">Penerbit</label>
+                <input type="text" id="penerbit" name="penerbit"
+                       value="<?= h($values['penerbit']) ?>" required>
+            </div>
+
+            <div class="form-group">
+                <label for="tahun_terbit">Tahun Terbit</label>
+                <input type="number" id="tahun_terbit" name="tahun_terbit"
+                       min="1000" max="<?= date('Y') ?>"
+                       value="<?= h($values['tahun_terbit']) ?>" required>
+            </div>
+
+            <div class="form-group">
+                <label for="id_kategori">Kategori</label>
+                <select id="id_kategori" name="id_kategori" required>
+                    <option value="">-- Pilih Kategori --</option>
+
+                    <?php foreach ($kategori as $item): ?>
+                        <option
+                            value="<?= (int) $item['id_kategori'] ?>"
+                            <?= (string) $values['id_kategori'] === (string) $item['id_kategori']
+                                ? 'selected'
+                                : '' ?>
+                        >
+                            <?= h($item['nama_kategori']) ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="id_rak">Lokasi Rak</label>
+                <select id="id_rak" name="id_rak" required>
+                    <option value="">-- Pilih Rak --</option>
+
+                    <?php foreach ($rak as $item): ?>
+                        <option
+                            value="<?= (int) $item['id_rak'] ?>"
+                            <?= (string) $values['id_rak'] === (string) $item['id_rak']
+                                ? 'selected'
+                                : '' ?>
+                        >
+                            <?= h($item['kode_rak'] . ' - ' . $item['nama_rak']) ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="jumlah_stok">Jumlah Stok</label>
+                <input type="number" id="jumlah_stok" name="jumlah_stok"
+                       min="0"
+                       value="<?= h($values['jumlah_stok']) ?>" required>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="save-button">
+                    Simpan Perubahan
+                </button>
+
+                <a href="index.php" class="cancel-button">
+                    Kembali
+                </a>
+            </div>
+
+        </form>
+    </section>
+
+</main>
+
+<footer>
     <p>
-        <label>Nomor Katalog</label><br>
-        <input type="text" name="no_katalog" required
-            value="<?= htmlspecialchars($buku['no_katalog'], ENT_QUOTES, 'UTF-8') ?>">
+        &copy; <?= date('Y') ?> FINDLIB -
+        Ruang Baca FMIPA Universitas Halu Oleo
     </p>
-
-    <p>
-        <label>Judul Buku</label><br>
-        <input type="text" name="judul" required
-            value="<?= htmlspecialchars($buku['judul'], ENT_QUOTES, 'UTF-8') ?>">
-    </p>
-
-    <p>
-        <label>Penulis</label><br>
-        <input type="text" name="penulis" required
-            value="<?= htmlspecialchars($buku['penulis'], ENT_QUOTES, 'UTF-8') ?>">
-    </p>
-
-    <p>
-        <label>Penerbit</label><br>
-        <input type="text" name="penerbit" required
-            value="<?= htmlspecialchars($buku['penerbit'], ENT_QUOTES, 'UTF-8') ?>">
-    </p>
-
-    <p>
-        <label>Tahun Terbit</label><br>
-        <input type="number" name="tahun_terbit"
-            min="1000" max="<?= date('Y') ?>" required
-            value="<?= (int) $buku['tahun_terbit'] ?>">
-    </p>
-
-    <p>
-        <label>Kategori</label><br>
-        <select name="id_kategori" required>
-            <?php foreach ($kategori as $item): ?>
-                <option value="<?= (int) $item['id_kategori'] ?>"
-                    <?= (int) $buku['id_kategori'] === (int) $item['id_kategori'] ? 'selected' : '' ?>>
-                    <?= htmlspecialchars($item['nama_kategori'], ENT_QUOTES, 'UTF-8') ?>
-                </option>
-            <?php endforeach; ?>
-        </select>
-    </p>
-
-    <p>
-        <label>Lokasi Rak</label><br>
-        <select name="id_rak" required>
-            <?php foreach ($rak as $item): ?>
-                <option value="<?= (int) $item['id_rak'] ?>"
-                    <?= (int) $buku['id_rak'] === (int) $item['id_rak'] ? 'selected' : '' ?>>
-                    <?= htmlspecialchars($item['kode_rak'] . ' - ' . $item['nama_rak'], ENT_QUOTES, 'UTF-8') ?>
-                </option>
-            <?php endforeach; ?>
-        </select>
-    </p>
-
-    <p>
-        <label>Jumlah Stok</label><br>
-        <input type="number" name="jumlah_stok"
-            min="0" required
-            value="<?= (int) $buku['jumlah_stok'] ?>">
-    </p>
-
-    <button type="submit">Simpan Perubahan</button>
-    <a href="index.php">Kembali</a>
-
-</form>
+</footer>
 
 </body>
 </html>

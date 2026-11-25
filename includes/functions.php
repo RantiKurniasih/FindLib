@@ -1,6 +1,9 @@
 <?php
 declare(strict_types=1);
 
+/**
+ * Mengambil daftar buku berdasarkan kata kunci dan kategori.
+ */
 function getBooks(
     PDO $pdo,
     string $keyword = '',
@@ -52,7 +55,7 @@ function getBooks(
         $params['katalog'] = $pattern;
     }
 
-    if ($categoryId !== null) {
+    if ($categoryId !== null && $categoryId > 0) {
         $sql .= " AND b.id_kategori = :kategori";
         $params['kategori'] = $categoryId;
     }
@@ -74,8 +77,15 @@ function getBooks(
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
+/**
+ * Mengambil detail buku berdasarkan ID.
+ */
 function getBookById(PDO $pdo, int $id): ?array
 {
+    if ($id < 1) {
+        return null;
+    }
+
     $stmt = $pdo->prepare("
         SELECT
             b.*,
@@ -91,17 +101,24 @@ function getBookById(PDO $pdo, int $id): ?array
         LIMIT 1
     ");
 
-    $stmt->execute(['id' => $id]);
+    $stmt->execute([
+        'id' => $id
+    ]);
 
     $book = $stmt->fetch(PDO::FETCH_ASSOC);
 
     return $book ?: null;
 }
 
+/**
+ * Mengambil seluruh kategori buku.
+ */
 function getCategories(PDO $pdo): array
 {
     $stmt = $pdo->query("
-        SELECT id_kategori, nama_kategori
+        SELECT
+            id_kategori,
+            nama_kategori
         FROM kategori
         ORDER BY nama_kategori ASC
     ");
@@ -109,6 +126,9 @@ function getCategories(PDO $pdo): array
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
+/**
+ * Menentukan status ketersediaan buku.
+ */
 function getAvailabilityStatus(int $stock): string
 {
     return $stock > 0

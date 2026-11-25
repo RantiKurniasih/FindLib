@@ -13,13 +13,22 @@ if (!$id || $id < 1) {
     exit('ID akun tidak valid.');
 }
 
-$stmt = $pdo->prepare(
-    'SELECT id_pengguna, nama, username
-     FROM pengguna
-     WHERE id_pengguna = :id'
-);
-$stmt->execute(['id' => $id]);
-$account = $stmt->fetch(PDO::FETCH_ASSOC);
+try {
+    $stmt = $pdo->prepare(
+        'SELECT id_pengguna, nama, username
+         FROM pengguna
+         WHERE id_pengguna = :id
+         LIMIT 1'
+    );
+
+    $stmt->execute(['id' => $id]);
+    $account = $stmt->fetch(PDO::FETCH_ASSOC);
+
+} catch (PDOException $e) {
+    error_log('Ambil akun untuk ganti password error: ' . $e->getMessage());
+    http_response_code(500);
+    exit('Terjadi kesalahan sistem.');
+}
 
 if (!$account) {
     http_response_code(404);
@@ -30,12 +39,18 @@ $error = '';
 $success = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $passwordAdmin = (string) ($_POST['password_admin'] ?? '');
-    $passwordBaru = (string) ($_POST['password_baru'] ?? '');
-    $konfirmasi = (string) ($_POST['konfirmasi'] ?? '');
+    $csrfInput = $_POST['csrf_token'] ?? null;
+    $passwordAdminInput = $_POST['password_admin'] ?? '';
+    $passwordBaruInput = $_POST['password_baru'] ?? '';
+    $konfirmasiInput = $_POST['konfirmasi'] ?? '';
 
-    if (!verifyCsrf($_POST['csrf_token'] ?? null)) {
-        $error = 'Token keamanan tidak valid.';
+    $csrf = is_string($csrfInput) ? $csrfInput : null;
+    $passwordAdmin = is_string($passwordAdminInput) ? $passwordAdminInput : '';
+    $passwordBaru = is_string($passwordBaruInput) ? $passwordBaruInput : '';
+    $konfirmasi = is_string($konfirmasiInput) ? $konfirmasiInput : '';
+
+    if (!verifyCsrf($csrf)) {
+        $error = 'Token keamanan tidak valid. Silakan muat ulang halaman.';
     } elseif (
         $passwordAdmin === '' ||
         $passwordBaru === '' ||
@@ -49,58 +64,72 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif ($passwordBaru !== $konfirmasi) {
         $error = 'Konfirmasi password tidak sesuai.';
     } else {
-        $check = $pdo->prepare(
-            'SELECT password_hash
-             FROM pengguna
-             WHERE id_pengguna = :id
-               AND status_aktif = 1'
-        );
-        $check->execute([
-            'id' => (int) $admin['id_pengguna']
-        ]);
+        try {
+            $check = $pdo->prepare(
+                'SELECT password_hash
+                 FROM pengguna
+                 WHERE id_pengguna = :id
+                   AND status_aktif = 1
+                 LIMIT 1'
+            );
 
-        $hashAdmin = $check->fetchColumn();
+            $check->execute([
+                'id' => (int) $admin['id_pengguna']
+            ]);
 
-        if (
-            !is_string($hashAdmin) ||
-            !password_verify($passwordAdmin, $hashAdmin)
-        ) {
-            $error = 'Password pengelola saat ini salah.';
-        } else {
-            try {
-                $hash = password_hash(
+            $hashAdmin = $check->fetchColumn();
+
+            if (
+                !is_string($hashAdmin) ||
+                !password_verify($passwordAdmin, $hashAdmin)
+            ) {
+                $error = 'Password pengelola saat ini salah.';
+            } else {
+                $hashBaru = password_hash(
                     $passwordBaru,
                     PASSWORD_DEFAULT
                 );
 
-                $update = $pdo->prepare(
-                    'UPDATE pengguna
-                     SET password_hash = :hash
-                     WHERE id_pengguna = :id'
-                );
+                if (!is_string($hashBaru)) {
+                    $error = 'Gagal membuat password baru.';
+                } else {
+                    $update = $pdo->prepare(
+                        'UPDATE pengguna
+                         SET password_hash = :hash
+                         WHERE id_pengguna = :id'
+                    );
 
-                $update->execute([
-                    'hash' => $hash,
-                    'id' => $id
-                ]);
+                    $update->execute([
+                        'hash' => $hashBaru,
+                        'id' => $id
+                    ]);
 
-                $success = 'Password berhasil diperbarui.';
-            } catch (PDOException $e) {
-                error_log($e->getMessage());
-                $error = 'Gagal memperbarui password.';
+                    $success = 'Password berhasil diperbarui.';
+                }
             }
+
+        } catch (PDOException $e) {
+            error_log('Ganti password akun error: ' . $e->getMessage());
+            $error = 'Terjadi kesalahan sistem. Gagal memperbarui password.';
         }
     }
 
-    unset($passwordAdmin, $passwordBaru, $konfirmasi);
+    unset(
+        $passwordAdmin,
+        $passwordBaru,
+        $konfirmasi,
+        $hashBaru
+    );
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0">
+
     <title>Ganti Password - FINDLIB</title>
 </head>
 <body>
@@ -112,17 +141,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     (<?= e($account['username']) ?>)
 </p>
 
-<p><a href="index.php">Kembali ke Daftar Akun</a></p>
+<p>
+    <a href="index.php">Kembali ke Daftar Akun</a>
+</p>
 
 <?php if ($error !== ''): ?>
-    <p role="alert"><?= e($error) ?></p>
+    <p role="alert">
+        <?= e($error) ?>
+    </p>
 <?php endif; ?>
 
 <?php if ($success !== ''): ?>
-    <p role="status"><?= e($success) ?></p>
+    <p role="status">
+        <?= e($success) ?>
+    </p>
 <?php endif; ?>
 
 <form method="POST">
+
     <input
         type="hidden"
         name="csrf_token"
@@ -133,35 +169,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <label for="password_admin">
             Password pengelola saat ini
         </label>
-        <input type="password"
-               id="password_admin"
-               name="password_admin"
-               autocomplete="current-password"
-               required>
+
+        <input
+            type="password"
+            id="password_admin"
+            name="password_admin"
+            autocomplete="current-password"
+            required
+        >
     </p>
 
     <p>
-        <label for="password_baru">Password baru</label>
-        <input type="password"
-               id="password_baru"
-               name="password_baru"
-               minlength="8"
-               autocomplete="new-password"
-               required>
+        <label for="password_baru">
+            Password baru
+        </label>
+
+        <input
+            type="password"
+            id="password_baru"
+            name="password_baru"
+            minlength="8"
+            maxlength="1024"
+            autocomplete="new-password"
+            required
+        >
     </p>
 
     <p>
         <label for="konfirmasi">
             Konfirmasi password baru
         </label>
-        <input type="password"
-               id="konfirmasi"
-               name="konfirmasi"
-               autocomplete="new-password"
-               required>
+
+        <input
+            type="password"
+            id="konfirmasi"
+            name="konfirmasi"
+            minlength="8"
+            maxlength="1024"
+            autocomplete="new-password"
+            required
+        >
     </p>
 
-    <button type="submit">Ganti Password</button>
+    <button type="submit">
+        Ganti Password
+    </button>
+
 </form>
 
 </body>

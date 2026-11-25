@@ -5,21 +5,27 @@ require_once __DIR__ . '/../../includes/auth.php';
 require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../includes/functions.php';
 
-// Hanya admin yang sudah login boleh mengakses halaman ini
 wajibLogin();
 
-// Membuat token CSRF
 if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
-// Mengambil seluruh data buku
 try {
     $books = getBooks($pdo);
 } catch (PDOException $e) {
     error_log('Admin book list error: ' . $e->getMessage());
     http_response_code(500);
     exit('Terjadi kesalahan saat mengambil data buku.');
+}
+
+function h(mixed $value): string
+{
+    return htmlspecialchars(
+        (string) $value,
+        ENT_QUOTES | ENT_SUBSTITUTE,
+        'UTF-8'
+    );
 }
 ?>
 
@@ -30,6 +36,128 @@ try {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kelola Buku - Admin FINDLIB</title>
     <link rel="stylesheet" href="/FindLib/assets/css/style.css">
+
+    <style>
+        .admin-content {
+            max-width: 1200px;
+            margin: 45px auto;
+            padding: 20px;
+        }
+
+        .admin-heading {
+            margin-bottom: 25px;
+        }
+
+        .admin-heading h1 {
+            color: #173b70;
+            margin-bottom: 10px;
+        }
+
+        .add-book-button {
+            display: inline-block;
+            background: #2457a7;
+            color: white;
+            padding: 12px 22px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            margin-bottom: 25px;
+        }
+
+        .add-book-button:hover {
+            background: #173b70;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 3px 14px rgba(0,0,0,0.08);
+        }
+
+        .table-container table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 850px;
+        }
+
+        .table-container th {
+            background: #173b70;
+            color: white;
+            padding: 15px;
+            text-align: left;
+        }
+
+        .table-container td {
+            padding: 14px 15px;
+            border-bottom: 1px solid #e8edf4;
+        }
+
+        .table-container tr:hover td {
+            background: #f5f8fc;
+        }
+
+        .stock-badge {
+            display: inline-block;
+            padding: 6px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .available {
+            background: #dff5e5;
+            color: #217a3b;
+        }
+
+        .unavailable {
+            background: #fde4e4;
+            color: #b52b2b;
+        }
+
+        .action-edit,
+        .action-delete {
+            display: inline-block;
+            padding: 7px 12px;
+            border: none;
+            border-radius: 6px;
+            text-decoration: none;
+            color: white;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .action-edit {
+            background: #2878c7;
+        }
+
+        .action-delete {
+            background: #c0392b;
+        }
+
+        .action-edit:hover {
+            background: #185b9c;
+        }
+
+        .action-delete:hover {
+            background: #962d22;
+        }
+
+        .empty-state {
+            background: white;
+            padding: 35px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 3px 14px rgba(0,0,0,0.08);
+        }
+
+        @media (max-width: 600px) {
+            .admin-content {
+                padding: 15px;
+                margin: 25px auto;
+            }
+        }
+    </style>
 </head>
 <body>
 
@@ -45,18 +173,20 @@ try {
     </nav>
 </header>
 
-<main class="features">
-    <h1>Kelola Data Buku</h1>
+<main class="admin-content">
 
-    <p>Daftar seluruh koleksi buku FINDLIB.</p>
+    <div class="admin-heading">
+        <h1>Kelola Data Buku</h1>
+        <p>Daftar seluruh koleksi buku FINDLIB.</p>
+    </div>
 
-    <a href="tambah.php" class="book-detail-link">
+    <a href="tambah.php" class="add-book-button">
         + Tambah Buku
     </a>
 
     <?php if (!empty($books)): ?>
 
-        <div class="catalog-results">
+        <div class="table-container">
             <table>
                 <thead>
                     <tr>
@@ -77,49 +207,27 @@ try {
 
                         <tr>
                             <td><?= $index + 1 ?></td>
-
-                            <td>
-                                <?= htmlspecialchars(
-                                    $book['no_katalog'],
-                                    ENT_QUOTES,
-                                    'UTF-8'
-                                ) ?>
-                            </td>
-
-                            <td>
-                                <?= htmlspecialchars(
-                                    $book['judul'],
-                                    ENT_QUOTES,
-                                    'UTF-8'
-                                ) ?>
-                            </td>
-
-                            <td>
-                                <?= htmlspecialchars(
-                                    $book['penulis'],
-                                    ENT_QUOTES,
-                                    'UTF-8'
-                                ) ?>
-                            </td>
-
-                            <td>
-                                <?= htmlspecialchars(
-                                    $book['nama_kategori'],
-                                    ENT_QUOTES,
-                                    'UTF-8'
-                                ) ?>
-                            </td>
-
+                            <td><?= h($book['no_katalog']) ?></td>
+                            <td><strong><?= h($book['judul']) ?></strong></td>
+                            <td><?= h($book['penulis']) ?></td>
+                            <td><?= h($book['nama_kategori']) ?></td>
                             <td><?= (int) $book['jumlah_stok'] ?></td>
 
                             <td>
-                                <?= $available
-                                    ? 'Tersedia'
-                                    : 'Tidak Tersedia' ?>
+                                <span class="stock-badge <?= $available
+                                    ? 'available'
+                                    : 'unavailable' ?>">
+                                    <?= $available
+                                        ? 'Tersedia'
+                                        : 'Tidak Tersedia' ?>
+                                </span>
                             </td>
 
                             <td>
-                                <a href="edit.php?id=<?= (int) $book['id_buku'] ?>">
+                                <a
+                                    href="edit.php?id=<?= (int) $book['id_buku'] ?>"
+                                    class="action-edit"
+                                >
                                     Edit
                                 </a>
 
@@ -138,14 +246,13 @@ try {
                                     <input
                                         type="hidden"
                                         name="csrf_token"
-                                        value="<?= htmlspecialchars(
-                                            $_SESSION['csrf_token'],
-                                            ENT_QUOTES,
-                                            'UTF-8'
-                                        ) ?>"
+                                        value="<?= h($_SESSION['csrf_token']) ?>"
                                     >
 
-                                    <button type="submit">
+                                    <button
+                                        type="submit"
+                                        class="action-delete"
+                                    >
                                         Hapus
                                     </button>
                                 </form>
@@ -164,6 +271,7 @@ try {
         </div>
 
     <?php endif; ?>
+
 </main>
 
 <footer>

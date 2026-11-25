@@ -13,14 +13,23 @@ if (!$id || $id < 1) {
     exit('ID akun tidak valid.');
 }
 
-$stmt = $pdo->prepare(
-    'SELECT id_pengguna, nama, username, email
-     FROM pengguna
-     WHERE id_pengguna = :id'
-);
-$stmt->execute(['id' => $id]);
+try {
+    $stmt = $pdo->prepare(
+        'SELECT id_pengguna, nama, username, email
+         FROM pengguna
+         WHERE id_pengguna = :id
+         LIMIT 1'
+    );
 
-$account = $stmt->fetch(PDO::FETCH_ASSOC);
+    $stmt->execute(['id' => $id]);
+
+    $account = $stmt->fetch(PDO::FETCH_ASSOC);
+
+} catch (PDOException $e) {
+    error_log('Ambil data akun error: ' . $e->getMessage());
+    http_response_code(500);
+    exit('Terjadi kesalahan sistem.');
+}
 
 if (!$account) {
     http_response_code(404);
@@ -33,40 +42,50 @@ $username = $account['username'];
 $email = $account['email'];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $nama = trim((string) ($_POST['nama'] ?? ''));
-    $username = trim((string) ($_POST['username'] ?? ''));
-    $email = trim((string) ($_POST['email'] ?? ''));
+    $csrf = $_POST['csrf_token'] ?? null;
 
-    if (!verifyCsrf($_POST['csrf_token'] ?? null)) {
-        $error = 'Token keamanan tidak valid.';
-    } elseif ($nama === '' || $username === '' || $email === '') {
+    $namaInput = $_POST['nama'] ?? '';
+    $usernameInput = $_POST['username'] ?? '';
+    $emailInput = $_POST['email'] ?? '';
+
+    $nama = is_string($namaInput) ? trim($namaInput) : '';
+    $username = is_string($usernameInput) ? trim($usernameInput) : '';
+    $email = is_string($emailInput) ? trim($emailInput) : '';
+
+    if (!verifyCsrf(is_string($csrf) ? $csrf : null)) {
+        $error = 'Token keamanan tidak valid. Silakan muat ulang halaman.';
+    } elseif (
+        $nama === '' ||
+        $username === '' ||
+        $email === ''
+    ) {
         $error = 'Semua kolom wajib diisi.';
     } elseif (
-        mb_strlen($nama) > 100 ||
-        mb_strlen($username) > 50 ||
+        mb_strlen($nama, 'UTF-8') > 100 ||
+        mb_strlen($username, 'UTF-8') > 50 ||
         strlen($email) > 150
     ) {
         $error = 'Data terlalu panjang.';
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $error = 'Format email tidak valid.';
     } else {
-        $check = $pdo->prepare(
-            'SELECT COUNT(*)
-             FROM pengguna
-             WHERE (username = :username OR email = :email)
-               AND id_pengguna <> :id'
-        );
+        try {
+            $check = $pdo->prepare(
+                'SELECT COUNT(*)
+                 FROM pengguna
+                 WHERE (username = :username OR email = :email)
+                   AND id_pengguna <> :id'
+            );
 
-        $check->execute([
-            'username' => $username,
-            'email' => $email,
-            'id' => $id
-        ]);
+            $check->execute([
+                'username' => $username,
+                'email' => $email,
+                'id' => $id
+            ]);
 
-        if ((int) $check->fetchColumn() > 0) {
-            $error = 'Username atau email sudah digunakan.';
-        } else {
-            try {
+            if ((int) $check->fetchColumn() > 0) {
+                $error = 'Username atau email sudah digunakan.';
+            } else {
                 $update = $pdo->prepare(
                     'UPDATE pengguna
                      SET nama = :nama,
@@ -84,77 +103,265 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 header('Location: index.php');
                 exit;
-            } catch (PDOException $e) {
-                if ($e->getCode() === '23000') {
-                    $error = 'Username atau email sudah digunakan.';
-                } else {
-                    error_log($e->getMessage());
-                    $error = 'Gagal memperbarui akun.';
-                }
+            }
+
+        } catch (PDOException $e) {
+            error_log('Update akun error: ' . $e->getMessage());
+
+            if ($e->getCode() === '23000') {
+                $error = 'Username atau email sudah digunakan.';
+            } else {
+                $error = 'Terjadi kesalahan sistem. Gagal memperbarui akun.';
             }
         }
     }
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0">
+
     <title>Edit Akun - FINDLIB</title>
+
+    <link rel="stylesheet"
+          href="/FindLib/assets/css/style.css">
+
+    <style>
+        .account-form-wrapper {
+            max-width: 720px;
+            margin: 45px auto;
+            padding: 20px;
+        }
+
+        .account-form-card {
+            background: #ffffff;
+            padding: 32px;
+            border-radius: 14px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.07);
+        }
+
+        .account-form-card h1 {
+            color: #183b63;
+            font-size: 27px;
+            margin-bottom: 10px;
+        }
+
+        .form-description {
+            color: #64748b;
+            margin-bottom: 28px;
+            line-height: 1.6;
+        }
+
+        .account-form-group {
+            margin-bottom: 20px;
+        }
+
+        .account-form-group label {
+            display: block;
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 8px;
+        }
+
+        .account-form-group input {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 12px 14px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 15px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .account-form-group input:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .account-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+            padding: 13px 16px;
+            border-radius: 8px;
+            margin-bottom: 22px;
+        }
+
+        .account-form-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 28px;
+            flex-wrap: wrap;
+        }
+
+        .account-save-button,
+        .account-cancel-button {
+            display: inline-block;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .account-save-button {
+            background: #1d4ed8;
+            color: #ffffff;
+        }
+
+        .account-save-button:hover {
+            background: #1e40af;
+        }
+
+        .account-cancel-button {
+            background: #e2e8f0;
+            color: #334155;
+        }
+
+        .account-cancel-button:hover {
+            background: #cbd5e1;
+        }
+
+        @media (max-width: 600px) {
+            .account-form-wrapper {
+                margin: 20px auto;
+                padding: 12px;
+            }
+
+            .account-form-card {
+                padding: 22px;
+            }
+
+            .account-form-actions {
+                flex-direction: column;
+            }
+
+            .account-form-actions a,
+            .account-form-actions button {
+                width: 100%;
+                box-sizing: border-box;
+            }
+        }
+    </style>
 </head>
+
 <body>
 
-<h1>Edit Akun Pengelola</h1>
+<header>
+    <nav class="navbar">
+        <div class="logo">📚 FINDLIB Admin</div>
 
-<p>
-    <a href="index.php">Kembali ke Daftar Akun</a>
-</p>
+        <ul class="nav-menu">
+            <li><a href="/FindLib/index.php">Beranda</a></li>
+            <li><a href="/FindLib/katalog.php">Katalog Buku</a></li>
+            <li><a href="/FindLib/admin/dashboard.php">Dashboard Admin</a></li>
+        </ul>
+    </nav>
+</header>
 
-<?php if ($error !== ''): ?>
-    <p role="alert"><?= e($error) ?></p>
-<?php endif; ?>
+<main class="account-form-wrapper">
 
-<form method="POST">
-    <input
-        type="hidden"
-        name="csrf_token"
-        value="<?= e(csrfToken()) ?>"
-    >
+    <section class="account-form-card">
 
+        <h1>Edit Akun Pengelola</h1>
+
+        <p class="form-description">
+            Perbarui informasi akun administrator FINDLIB.
+            Pastikan data yang dimasukkan sudah benar.
+        </p>
+
+        <?php if ($error !== ''): ?>
+            <div class="account-error" role="alert">
+                <?= e($error) ?>
+            </div>
+        <?php endif; ?>
+
+        <form method="POST">
+
+            <input
+                type="hidden"
+                name="csrf_token"
+                value="<?= e(csrfToken()) ?>"
+            >
+
+            <div class="account-form-group">
+                <label for="nama">Nama Lengkap</label>
+                <input
+                    type="text"
+                    id="nama"
+                    name="nama"
+                    value="<?= e($nama) ?>"
+                    maxlength="100"
+                    placeholder="Masukkan nama lengkap"
+                    autocomplete="name"
+                    required
+                >
+            </div>
+
+            <div class="account-form-group">
+                <label for="username">Username</label>
+                <input
+                    type="text"
+                    id="username"
+                    name="username"
+                    value="<?= e($username) ?>"
+                    maxlength="50"
+                    placeholder="Masukkan username"
+                    autocomplete="username"
+                    required
+                >
+            </div>
+
+            <div class="account-form-group">
+                <label for="email">Email</label>
+                <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    value="<?= e($email) ?>"
+                    maxlength="150"
+                    placeholder="Masukkan alamat email"
+                    autocomplete="email"
+                    required
+                >
+            </div>
+
+            <div class="account-form-actions">
+                <button
+                    type="submit"
+                    class="account-save-button"
+                >
+                    Simpan Perubahan
+                </button>
+
+                <a
+                    href="index.php"
+                    class="account-cancel-button"
+                >
+                    Kembali
+                </a>
+            </div>
+
+        </form>
+
+    </section>
+
+</main>
+
+<footer>
     <p>
-        <label for="nama">Nama lengkap</label>
-        <input type="text"
-               id="nama"
-               name="nama"
-               value="<?= e($nama) ?>"
-               maxlength="100"
-               required>
+        &copy; <?= date('Y') ?> FINDLIB -
+        Ruang Baca FMIPA Universitas Halu Oleo
     </p>
-
-    <p>
-        <label for="username">Username</label>
-        <input type="text"
-               id="username"
-               name="username"
-               value="<?= e($username) ?>"
-               maxlength="50"
-               required>
-    </p>
-
-    <p>
-        <label for="email">Email</label>
-        <input type="email"
-               id="email"
-               name="email"
-               value="<?= e($email) ?>"
-               maxlength="150"
-               required>
-    </p>
-
-    <button type="submit">Simpan Perubahan</button>
-</form>
+</footer>
 
 </body>
 </html>

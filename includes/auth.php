@@ -22,7 +22,11 @@ function e(mixed $value): string
  */
 function csrfToken(): string
 {
-    if (empty($_SESSION['csrf_token'])) {
+    if (
+        !isset($_SESSION['csrf_token']) ||
+        !is_string($_SESSION['csrf_token']) ||
+        $_SESSION['csrf_token'] === ''
+    ) {
         $_SESSION['csrf_token'] = bin2hex(
             random_bytes(32)
         );
@@ -38,6 +42,7 @@ function verifyCsrf(?string $token): bool
 {
     return is_string($token)
         && isset($_SESSION['csrf_token'])
+        && is_string($_SESSION['csrf_token'])
         && hash_equals($_SESSION['csrf_token'], $token);
 }
 
@@ -46,7 +51,12 @@ function verifyCsrf(?string $token): bool
  */
 function sudahLogin(): bool
 {
-    return isset($_SESSION['admin_id']);
+    return isset($_SESSION['admin_id'])
+        && filter_var(
+            $_SESSION['admin_id'],
+            FILTER_VALIDATE_INT
+        ) !== false
+        && (int) $_SESSION['admin_id'] > 0;
 }
 
 /**
@@ -65,7 +75,8 @@ function idPenggunaLogin(): ?int
 function usernameLogin(): ?string
 {
     return isset($_SESSION['username'])
-        ? (string) $_SESSION['username']
+        && is_string($_SESSION['username'])
+        ? $_SESSION['username']
         : null;
 }
 
@@ -75,7 +86,11 @@ function usernameLogin(): ?string
 function wajibLogin(): void
 {
     if (!sudahLogin()) {
-        header('Location: ' . FINDLIB_BASE_URL . '/admin/login.php');
+        header(
+            'Location: ' .
+            FINDLIB_BASE_URL .
+            '/admin/login.php'
+        );
         exit;
     }
 }
@@ -86,28 +101,50 @@ function wajibLogin(): void
 function requireAdmin(PDO $pdo): array
 {
     if (!sudahLogin()) {
-        header('Location: ' . FINDLIB_BASE_URL . '/admin/login.php');
+        header(
+            'Location: ' .
+            FINDLIB_BASE_URL .
+            '/admin/login.php'
+        );
         exit;
     }
 
-    $stmt = $pdo->prepare(
-        'SELECT id_pengguna, nama, username,
-                email, status_aktif
-         FROM pengguna
-         WHERE id_pengguna = :id
-         LIMIT 1'
-    );
+    try {
+        $stmt = $pdo->prepare(
+            'SELECT id_pengguna, nama, username,
+                    email, status_aktif
+             FROM pengguna
+             WHERE id_pengguna = :id
+             LIMIT 1'
+        );
 
-    $stmt->execute([
-        'id' => idPenggunaLogin()
-    ]);
+        $stmt->execute([
+            'id' => idPenggunaLogin()
+        ]);
 
-    $admin = $stmt->fetch();
+        $admin = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if (!$admin || (int) $admin['status_aktif'] !== 1) {
+    } catch (PDOException $e) {
+        error_log(
+            'Admin authentication error: ' .
+            $e->getMessage()
+        );
+
+        http_response_code(500);
+        exit('Terjadi kesalahan sistem.');
+    }
+
+    if (
+        !$admin ||
+        (int) $admin['status_aktif'] !== 1
+    ) {
         logoutPengguna();
 
-        header('Location: ' . FINDLIB_BASE_URL . '/admin/login.php');
+        header(
+            'Location: ' .
+            FINDLIB_BASE_URL .
+            '/admin/login.php'
+        );
         exit;
     }
 
