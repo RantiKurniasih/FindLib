@@ -1,6 +1,5 @@
 # Konfigurasi database lokal
 /database/config.local.php
-/config/database.php
 /database/config.local.php
 
 # File rahasia
@@ -29,4 +28,3 @@ Thumbs.db
 # Pengujian integrasi lokal
 /database/test-getbooks.php
 /database/test-pdo.php
-/fetchColumn()
